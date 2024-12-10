@@ -1,0 +1,225 @@
+import mysql.connector
+mydb=mysql.connector.connect(host="localhost",user="root",password="welcome")
+mycur=mydb.cursor()
+mycur.execute("create database if not exists mydb")
+mycur.execute("use mydb")
+vel="create table if not exists customer(cust_id int(3) primary key,name varchar(25) not null,onrent varchar(30),payment int(4))"
+mycur.execute(vel)
+#customer records
+def cust():
+    def add():
+        num=int(input("enter number of records: "))
+        for i in range(num):
+            cust_id=input('cust id : ')
+            name=input('name: ')
+            onrent=input('book/movie name: ')
+            payment=input('payment: ')
+            val=(cust_id,name,onrent,payment)
+            sql="insert into customer(cust_id,name,onrent,payment) values (%s,%s,%s,%s)"
+            mycur.execute(sql,val)
+            mydb.commit()
+        print(num,"record inserted")
+    def display():
+        sql="select * from customer;"
+        mycur.execute(sql)
+        print("*"*80)
+        print('%5s%18s%19s%20s'%("customer id","name","onrent","payment"))
+        res=mycur.fetchall()
+        for i in res:
+            line='%5s%22s%20s%22s'%(i[0],i[1],i[2],i[3])
+            print(line)
+        print("*"*80)
+    def update():
+        cust_id1=int(input("enter customer id where field needs to be updated "))
+        print("to update","1.onrent","2.payment")
+        ch=int(input("enter choice"))
+        if ch<1 or ch>2:
+            print("invalid choice")
+        elif ch==1:
+            rent=input("enter rented movie/book to be updated:")
+            sql=f"update customer set onrent = {rent} where cust_id = {cust_id1}"
+            mycur.execute(sql)
+            mydb.commit()
+            print("updated")
+        elif ch==2:
+            pay=int(input("enter updated payment"))
+            sql=f"update customer set payment={pay} where cust_id={cust_id1}"
+            mycur.execute(sql)
+            mydb.commit()
+            print("updated")
+       
+    def choice():
+        print("function to run")
+        print("1.add record","2.display records","3.update records")
+        ch=int(input("enter choice"))
+        if ch<1 or ch>3:
+            print("invalid choice")
+        elif ch==1:
+            add()
+        elif ch==2:
+            display()
+        else:
+            update()
+    choice()
+#table 2(for rental and due dates)
+def rental_funcs():
+    vel1="create table if not exists rental(cust_id int(3),rentdate date , duedate date,status varchar(8),pay int(4))"
+    mycur.execute(vel1)
+    def add1():
+        num=int(input("enter number of records: "))
+        for i in range(num):
+            cust_id=input('customer id: ')
+            rentdate=input('date rented?: ')
+            duedate=input('due by: ')
+            status=input('status(returned/due): ')
+            val=(cust_id,rentdate,duedate,status)
+            sql="insert into rental(cust_id,rentdate,duedate,status) values (%s,%s,%s,%s)"
+            mycur.execute(sql,val)
+            mydb.commit()
+        print(num,"record inserted")
+    def display1():
+        sql="select * from rental;"
+        mycur.execute(sql)
+        print("*"*80)
+        print('%5s%25s%20s%25s'%("customer id","rentdate","duedate","status"))
+        res=mycur.fetchall()
+        for i in res:
+            line='%5s%25s%20s%25s'%(i[0],i[1],i[2],i[3])
+            print(line)
+        print("*"*80)
+    def fee():
+        sql=""" UPDATE rental r
+            JOIN customer c ON r.cust_id = c.cust_id
+            SET r.pay = c.payment * 1.1
+            WHERE DATEDIFF(CURDATE(), r.duedate) > 7"""
+        mycur.execute(sql)
+        mydb.commit()
+    def choice():
+        print("Function to run:")
+        print("1. Add record", "2. Display records", "3. Calculate fee")
+        ch = int(input("Enter choice: "))
+        if ch < 1 or ch > 3:
+            print("Invalid choice")
+        elif ch == 1:
+            add1()
+        elif ch == 2:
+            display1()
+        else:
+            fee()
+    choice()
+#table 3 for inventory
+def inventory():
+    vel2="create table if not exists inventory1(item_id int(3) primary key,name varchar(20),no_of_items int(3),price int(4))"
+    mycur.execute(vel2)
+    def add2():
+        num=int(input("enter number of records: "))
+        for i in range(num):
+            item_id=input('item id: ')
+            name=input('name: ')
+            no=input('no of items: ')
+            price=input("enter price:")
+            val=(item_id,name,no,price)
+            sql="insert into inventory1(item_id,name,no_of_items,price) values (%s,%s,%s,%s)"
+            mycur.execute(sql,val)
+            mydb.commit()
+        print(num,"record inserted")
+    def display2():
+        sql="select * from inventory1;"
+        mycur.execute(sql)
+        print("*"*80)
+        print('%5s%25s%20s%25s'%("item_id","name","no of items","price"))
+        res=mycur.fetchall()
+        for i in res:
+            line='%5s%25s%20s%25s'%(i[0],i[1],i[2],i[3])
+            print(line)
+        print("*"*80)
+    def update():
+        itemid=int(input("enter item id where field needs to be updated "))
+        print("to update","1.status","2.no of items","3.price")
+        ch=int(input("enter choice"))
+        if ch<1 or ch>3:
+            print("invalid choice")
+        elif ch==1:
+            name=input("enter rented movie/book status needs to be updated:")
+            sql=f"update inventory1 set name = {name} where item_id = {itemid}"
+            mycur.execute(sql)
+            mydb.commit()
+            print("updated")
+        elif ch==2:
+            no=int(input("enter no of items to be updated"))
+            sql=f"update inventory1 set no_of_items={no} where item_id={itemid}"
+            mycur.execute(sql)
+            mydb.commit()
+            print("updated")
+        else:
+            price=int(input("enter updated price"))
+            sql=f"update inventory1 set price={price} where item_id={itemid}"
+            mycur.execute(sql)
+            mydb.commit()
+            print("updated")
+    def choice():
+        print("function to run")
+        print("1.add record","2.display records","3.update records")
+        ch=int(input("enter choice"))
+        if ch<1 or ch>3:
+            print("invalid choice")
+        elif ch==1:
+            add2()
+        elif ch==2:
+            display2()
+        else:
+            update()
+    choice()
+def invent_funcs():
+    vel3="create table if not exists inventory_info1(item_id int(3) ,types varchar(10),genre varchar(25))"
+    mycur.execute(vel3)
+    def add2():
+        num=int(input("enter number of records: "))
+        for i in range(num):
+            item_id=input('item id: ')
+            tp=input('type (book/movie): ')
+            genre=input('genre: ')
+            val=(item_id,tp,genre,)
+            sql="insert into inventory_info1(item_id, types, genre) VALUES (%s, %s, %s)"
+            mycur.execute(sql,val)
+            mydb.commit()
+        print(num,"record inserted")
+    def display2():
+        sql="select * from inventory_info1;"
+        mycur.execute(sql)
+        print("*"*80)
+        print('%5s%25s%27s'%("item_id","types","genre"))
+        res=mycur.fetchall()
+        for i in res:
+            line='%5s%25s%27s'%(i[0],i[1],i[2])
+            print(line)
+        print("*"*80)
+
+    
+    def choice():
+        print("function to run")
+        print("1.add record","2.display records")
+        ch=int(input("enter choice"))
+        if ch<1 or ch>2:
+            print("invalid choice")
+        elif ch==1:
+            add2()
+        elif ch==2:
+            display2()
+    choice()
+def main_menu():
+    print("choose")
+    print("1.customer records","2.rental info","3.inventory","4.inventory info")
+    ch=int(input("enter table to work on"))
+    if ch<1 or ch>4:
+        print("invalid...choice does not exist")
+    elif ch==1:
+        cust()
+    elif ch==2:
+        rental_funcs()
+    elif ch==3:
+        inventory()
+    else:
+        invent_funcs()
+main_menu()
+        
